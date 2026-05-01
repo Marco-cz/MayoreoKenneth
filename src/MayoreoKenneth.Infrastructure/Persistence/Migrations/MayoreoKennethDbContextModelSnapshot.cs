@@ -22,6 +22,44 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("MayoreoKenneth.Domain.Entities.CatalogSyncLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("RowsAdded")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RowsHidden")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RowsUpdated")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StartedAtUtc");
+
+                    b.ToTable("CatalogSyncLogs", null, t =>
+                        {
+                            t.HasComment("Historial de sync de catálogo. Retención operativa: 90 días (DataRetentionHostedService).");
+                        });
+                });
+
             modelBuilder.Entity("MayoreoKenneth.Domain.Entities.Order", b =>
                 {
                     b.Property<Guid>("Id")
@@ -56,7 +94,10 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
                     b.HasIndex("OrderNumber")
                         .IsUnique();
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders", null, t =>
+                        {
+                            t.HasComment("Órdenes de venta. Retención fiscal CR: conservar años (típico 7+); NO borrar con job sin criterio legal.");
+                        });
                 });
 
             modelBuilder.Entity("MayoreoKenneth.Domain.Entities.OrderItem", b =>
@@ -97,7 +138,10 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems", null, t =>
+                        {
+                            t.HasComment("Líneas de orden. Retención: alineada a Orders; sin borrado automático.");
+                        });
                 });
 
             modelBuilder.Entity("MayoreoKenneth.Domain.Entities.PriceRule", b =>
@@ -133,7 +177,10 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("PriceRules", (string)null);
+                    b.ToTable("PriceRules", null, t =>
+                        {
+                            t.HasComment("Reglas históricas de precio. Retención: opcional purga >24 meses si política comercial lo permite (job futuro).");
+                        });
                 });
 
             modelBuilder.Entity("MayoreoKenneth.Domain.Entities.Product", b =>
@@ -142,6 +189,10 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<decimal>("AdminDiscountPercent")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("numeric(9,4)");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -149,7 +200,24 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
                         .HasMaxLength(1500)
                         .HasColumnType("character varying(1500)");
 
+                    b.Property<decimal>("DisplayPriceWithIva")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime?>("FirstOutOfStockAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsCatalogHidden")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsPublished")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IvaIncludedInDisplayPrice")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")
@@ -170,7 +238,10 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
                     b.HasIndex("Sku")
                         .IsUnique();
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products", null, t =>
+                        {
+                            t.HasComment("Catálogo propio. Retención: productos con borrado lógico (IsCatalogHidden); no purge automático de filas.");
+                        });
                 });
 
             modelBuilder.Entity("MayoreoKenneth.Domain.Entities.ProductSupplierMap", b =>
@@ -211,7 +282,61 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProductId", "SupplierId")
                         .IsUnique();
 
-                    b.ToTable("ProductSupplierMaps", (string)null);
+                    b.ToTable("ProductSupplierMaps", null, t =>
+                        {
+                            t.HasComment("Mapeo a id/SKU proveedor y último costo sincronizado. Retención: vinculada al producto; sin purge suelta. No persistimos cantidad de stock.");
+                        });
+                });
+
+            modelBuilder.Entity("MayoreoKenneth.Domain.Entities.StoreSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CatalogSyncHourLocal")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("DefaultMarkupPercent")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<decimal>("IvaPercentOnSale")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("numeric(9,4)");
+
+                    b.Property<DateTime?>("LastCatalogSyncCompletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<int>("UnavailableHideAfterDays")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StoreSettings", null, t =>
+                        {
+                            t.HasComment("Configuración global (margen, IVA, días sin stock). Retención: fila única permanente.");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            CatalogSyncHourLocal = 2,
+                            DefaultMarkupPercent = 40m,
+                            IvaPercentOnSale = 13m,
+                            TimeZoneId = "America/Costa_Rica",
+                            UnavailableHideAfterDays = 21,
+                            UpdatedAtUtc = new DateTime(2026, 5, 1, 2, 11, 13, 478, DateTimeKind.Utc).AddTicks(3268)
+                        });
                 });
 
             modelBuilder.Entity("MayoreoKenneth.Domain.Entities.Supplier", b =>
@@ -248,7 +373,20 @@ namespace MayoreoKenneth.Infrastructure.Persistence.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers", null, t =>
+                        {
+                            t.HasComment("Proveedores. Retención: no borrar filas salvo baja contractual; auditoría comercial.");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+                            Code = "SIM",
+                            CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsActive = true,
+                            Name = "Proveedor simulado"
+                        });
                 });
 
             modelBuilder.Entity("MayoreoKenneth.Domain.Entities.OrderItem", b =>

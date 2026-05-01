@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MayoreoKenneth - Tienda</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>MayoreoKenneth</h1>
+    <button id="cartToggle" class="cart-button">Carrito (<span id="cartCount">0</span>)</button>
+  </header>
+
+  <main class="layout">
+    <section>
+      <h2>Catalogo</h2>
+      <p class="sub">MVP local sin BD ni pasarela.</p>
+      <div id="productGrid" class="grid"></div>
+    </section>
+
+    <aside id="cartPanel" class="cart-panel hidden">
+      <h3>Mi carrito</h3>
+      <div id="cartItems"></div>
+      <div class="total-row">
+        <span>Total:</span>
+        <strong id="cartTotal">$0.00</strong>
+      </div>
+
+      <h4 class="checkout-section-title">Datos para factura</h4>
+      <p class="checkout-hint">Estos datos se usaran para emitir su comprobante electronico ante Hacienda.</p>
+      <div class="checkout-fields">
+        <label>Tipo identificación</label>
+        <select id="factTipoId">
+          <option value="FISICA">Persona física</option>
+          <option value="JURIDICA">Persona jurídica</option>
+          <option value="DIMEX">DIMEX</option>
+          <option value="NITE">NITE</option>
+        </select>
+        <label>Número identificación</label>
+        <input id="factNumeroId" type="text" placeholder="Ej: 1-1234-5678" />
+        <label>Nombre completo o razón social</label>
+        <input id="factNombre" type="text" placeholder="Como debe salir en la factura" />
+        <label>Correo para factura</label>
+        <input id="factCorreo" type="email" placeholder="correo@ejemplo.com" />
+        <label>Teléfono</label>
+        <input id="factTelefono" type="tel" placeholder="Ej: 88887777" />
+      </div>
+
+      <h4 class="checkout-section-title">Entrega</h4>
+      <p class="checkout-hint">Puede ser distinta a la de facturación.</p>
+      <div class="checkout-fields">
+        <label>Nombre quien recibe</label>
+        <input id="envNombre" type="text" placeholder="Nombre del contacto" />
+        <label>Teléfono entrega</label>
+        <input id="envTelefono" type="tel" placeholder="Ej: 88887777" />
+        <label>Provincia</label>
+        <input id="envProvincia" type="text" placeholder="Ej: San José" />
+        <label>Cantón</label>
+        <input id="envCanton" type="text" placeholder="Ej: Montes de Oca" />
+        <label>Distrito (opcional)</label>
+        <input id="envDistrito" type="text" placeholder="Ej: San Pedro" />
+        <label>Dirección exacta</label>
+        <textarea id="envDireccion" rows="2" placeholder="Señas, edificio, apartamento..."></textarea>
+        <label>Referencias (opcional)</label>
+        <input id="envReferencias" type="text" placeholder="Punto de referencia" />
+      </div>
+
+      <button id="checkoutBtn" class="checkout">Simular checkout</button>
+      <p id="checkoutMessage" class="message"></p>
+    </aside>
+  </main>
+
+  <section class="orders-section">
+    <h3>Historial de ordenes MVP</h3>
+    <p class="sub">Estas ordenes son temporales y se reinician al reiniciar el API.</p>
+    <div id="ordersHistory"></div>
+  </section>
+
+  <section class="orders-section">
+    <h3>Errores, comentarios o consultas</h3>
+    <p class="sub">No requiere cuenta. Use este formulario para reportar fallos de la página, sugerencias o dudas. Si aplica, indique número de orden.</p>
+    <div class="checkout-fields">
+      <label>Correo de contacto</label>
+      <input id="soporteCorreo" type="email" placeholder="correo@ejemplo.com" />
+      <label>Nombre</label>
+      <input id="soporteNombre" type="text" placeholder="Su nombre" />
+      <label>Número de orden (opcional)</label>
+      <input id="soporteOrden" type="text" placeholder="Ej: MK-MVP-1001" />
+      <label>Asunto</label>
+      <input id="soporteAsunto" type="text" placeholder="Ej: Error al pagar / idea de mejora" />
+      <label>Mensaje</label>
+      <textarea id="soporteDescripcion" rows="4" placeholder="Detalle del error, comentario o consulta..."></textarea>
+      <button id="soporteEnviarBtn" type="button" class="small-btn confirm-btn">Enviar</button>
+    </div>
+    <p id="soporteMensaje" class="message"></p>
+  </section>
+
+  <button type="button" id="asistenteToggle" class="asistente-fab" aria-label="Abrir asistente de datos">Asistente</button>
+  <div id="asistentePanel" class="asistente-panel hidden" aria-live="polite">
+    <div class="asistente-head">
+      <strong>Asistente MayoreoKenneth</strong>
+      <button type="button" id="asistenteCerrar" class="asistente-cerrar" aria-label="Cerrar">×</button>
+    </div>
+    <p class="asistente-disclaimer">Asistente automático: le ayuda a llenar el formulario. No reemplaza a una persona.</p>
+    <div id="asistenteMensajes" class="asistente-mensajes"></div>
+    <div id="asistenteChips" class="asistente-chips hidden"></div>
+    <form id="asistenteForm" class="asistente-form">
+      <input id="asistenteInput" type="text" autocomplete="off" placeholder="Escriba su respuesta..." />
+      <button type="submit" class="small-btn confirm-btn">Enviar</button>
+    </form>
+    <button type="button" id="asistenteReiniciar" class="asistente-reiniciar small-btn">Empezar de nuevo</button>
+  </div>
+
+  <script src="./main.js"></script>
+</body>
+</html>

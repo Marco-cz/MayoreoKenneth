@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MayoreoKenneth.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+08c337e593d236fce2126c8bc795ad1f0014acaf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+da2537f90af470158c07696fc7934694dab21b21")]
 [assembly: System.Reflection.AssemblyProductAttribute("MayoreoKenneth.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MayoreoKenneth.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

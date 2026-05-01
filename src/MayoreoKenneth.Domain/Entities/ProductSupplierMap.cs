@@ -9,6 +9,7 @@ public class ProductSupplierMap
     public string SupplierProductId { get; set; } = string.Empty;
     public string? SupplierSku { get; set; }
     public decimal LastKnownCost { get; set; }
+
     public DateTime? LastSyncedAtUtc { get; set; }
     public bool IsActive { get; set; } = true;
 
