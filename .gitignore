@@ -1,0 +1,17 @@
+# Yurguen: Basura local .NET / VS
+**/bin/
+**/obj/
+**/out/
+*.user
+*.suo
+.vs/
+.idea/
+
+# Yurguen: Secretos locales (jamás subir contraseñas de BD/JWT prod)
+**/appsettings.*.local.json
+.env
+.env.*
+
+# Yurguen: Logs y coverage
+*.log
+**/TestResults/

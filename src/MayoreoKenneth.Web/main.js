@@ -1,4 +1,12 @@
-const apiBaseUrl = "https://localhost:7253";
+// Yurguen: Producción inyecta URL vía config.runtime.js (GitHub Actions). Local: vacío → fallback.
+const apiBaseUrl = (() => {
+  const raw = typeof window !== "undefined" ? window.__MK_API_BASE_URL__ : "";
+  const s = raw != null ? String(raw).trim() : "";
+  if (s.length > 0) {
+    return s.replace(/\/+$/, "");
+  }
+  return "https://localhost:7253";
+})();
 const cart = [];
 
 const productGrid = document.getElementById("productGrid");

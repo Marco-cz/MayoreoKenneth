@@ -39,15 +39,22 @@ builder.Services
         };
     });
 builder.Services.AddAuthorization();
+
+// Yurguen: Orígenes del front (local + GitHub Pages). En prod: Cors__AllowedOrigins__0 = https://<user>.github.io
+var corsOrigenes = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() is { Length: > 0 } arr
+    ? arr
+    :
+    [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5500",
+        "https://localhost:7253"
+    ];
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("LocalWeb", policy =>
+    options.AddPolicy("TiendaWeb", policy =>
     {
-        // Yurguen: Habilitamos CORS local para que la web consuma el API.
-        policy
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .WithOrigins("http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5500");
+        policy.AllowAnyHeader().AllowAnyMethod().WithOrigins(corsOrigenes);
     });
 });
 
@@ -75,8 +82,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
-app.UseCors("LocalWeb");
+// Yurguen: Detrás del TLS del PaaS conviene no forzar redirect HTTPS interno (rompe health checks).
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseCors("TiendaWeb");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

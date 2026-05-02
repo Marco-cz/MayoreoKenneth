@@ -1,0 +1,7 @@
+# Yurguen: Contexto Docker sólo código fuente necesario para publicar API
+**/.git
+**/.vs
+**/bin
+**/obj
+**/*.user
+**/TestResults

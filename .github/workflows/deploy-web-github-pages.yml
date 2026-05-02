@@ -1,0 +1,62 @@
+# Yurguen: Publica sólo la tienda estática (src/MayoreoKenneth.Web) a GitHub Pages.
+# Requiere: Settings → Pages → Source = GitHub Actions
+# Variables: MK_API_BASE_URL (pública) = URL base del API en prod, ej https://tu-api.up.railway.app
+
+name: Deploy web (GitHub Pages)
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/MayoreoKenneth.Web/**"
+      - ".github/workflows/deploy-web-github-pages.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: gh-pages-mayoreo
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Yurguen Armar artefacto del sitio
+        env:
+          MK_API_BASE_URL: ${{ vars.MK_API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp -r src/MayoreoKenneth.Web/* _site/
+          if [ -z "${MK_API_BASE_URL:-}" ]; then
+            echo "::error title=MK_API_BASE_URL vacía::Definila en Repo → Settings → Secrets and variables → Actions → Variables (ej. https://tu-api.up.railway.app sin barra final)"
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json, os, pathlib
+          url = os.environ["MK_API_BASE_URL"].strip().rstrip("/")
+          pathlib.Path("_site/config.runtime.js").write_text(
+              "window.__MK_API_BASE_URL__ = "
+              + json.dumps(url)
+              + ";\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
