@@ -1,11 +1,11 @@
-# MayoreoKenneth — implementación y despliegue (Yurguen)
+# ExhaTechStore — implementación y despliegue (Yurguen)
 
-Mono-repo GitHub:
+Mono-repo GitHub (**SaaS multi-tienda** por slug de URL):
 
 | Pieza | Dónde vive | Cómo se publica |
 |--------|-------------|-----------------|
-| **Tienda web** (`src/MayoreoKenneth.Web`) | Repo GitHub | **GitHub Actions → GitHub Pages** (workflow `deploy-web-github-pages.yml`) |
-| **API .NET** (`src/MayoreoKenneth.Api` + Domain + Infrastructure) | Mismo repo | **Docker** (`Dockerfile` en raíz) → Railway, Fly.io, Render u otro PaaS con Postgres gestionado (Neon, Supabase, etc.) |
+| **Tienda web** (`src/ExhaTechStore.Web`) | Repo GitHub | **GitHub Actions → GitHub Pages** (workflow `deploy-web-github-pages.yml`) |
+| **API .NET** (`src/ExhaTechStore.Api` + Domain + Infrastructure) | Mismo repo | **Docker** (`Dockerfile` en raíz) → Railway, Fly.io, Render u otro PaaS con Postgres gestionado (Neon, Supabase, etc.) |
 
 ---
 
@@ -14,23 +14,28 @@ Mono-repo GitHub:
 1. En el repo GitHub: **Settings → Pages → Build and deployment**: **GitHub Actions**.
 2. **Settings → Secrets and variables → Actions → Variables** (no hace falta máxima seguridad):
 
-   - `MK_API_BASE_URL` — URL base pública del API, **sin** `/` final. Ejemplo: `https://api-mayoreo.up.railway.app`
+   - `MK_API_BASE_URL` — URL base pública del API, **sin** `/` final. Ejemplo: `https://api-exhatech.up.railway.app`
+   - `MK_TENANT_SLUG` (opcional) — slug de la tienda (`mayoreokenneth`, `ninadesigns`, …); si falta usa `mayoreokenneth`.
 
-3. Cada push a `main` que toque la carpeta `src/MayoreoKenneth.Web/` dispara el deploy. También podés lanzar manual **Actions → Deploy web → Run workflow**.
+La web llama **`{MK_API_BASE_URL}/t/{slug}/api/products`** y el admin **`.../t/{slug}/api/tiendaconfig`** y **`.../t/{slug}/api/admin/Productos`**. Modo desarrollo sin Postgres: mismo patrón con `Catalog:DevTenants` en `appsettings.Development.json`.
+
+**Inventario por producto (`Product.InventoryMode`):** `SupplierManaged` (proveedor + consulta en vivo), `TenantManaged` (solo `ManualStockQuantity`), `Hybrid` (datos/precios del sync desde proveedor, cantidad vendible = `ManualStockQuantity`).
+
+3. Cada push a `main` que toque la carpeta `src/ExhaTechStore.Web/` dispara el deploy. También podés lanzar manual **Actions → Deploy web → Run workflow**.
 
 4. Tu sitio quedará en `https://<usuario>.github.io/<repo>/` (o dominio propio configurado en Pages).
 
-El workflow **sobrescribe** `_site/config.runtime.js` para que la web pegue al API prod. En local podés usar `src/MayoreoKenneth.Web/config.runtime.js` (vacío = fallback a localhost en `main.js`).
+El workflow **sobrescribe** `_site/config.runtime.js` para que la web pegue al API prod. En local podés usar `src/ExhaTechStore.Web/config.runtime.js` (vacío = fallback a localhost en `main.js`).
 
 ---
 
 ## 2. Back (Docker + Postgres)
 
 ```bash
-docker build -t mayoreokenneth-api .
+docker build -t exhatechstore-api .
 docker run --rm -p 8080:8080 ^
   -e ConnectionStrings__DefaultConnection="Host=...;Username=...;Password=...;Database=..." ^
-  mayoreokenneth-api
+  exhatechstore-api
 ```
 
 Variables típicas en el hosting:
@@ -45,7 +50,7 @@ Variables típicas en el hosting:
 Migraciones BD (una vez lista la cadena):
 
 ```bash
-dotnet ef database update --project src/MayoreoKenneth.Infrastructure/MayoreoKenneth.Infrastructure.csproj --startup-project src/MayoreoKenneth.Api/MayoreoKenneth.Api.csproj
+dotnet ef database update --project src/ExhaTechStore.Infrastructure/ExhaTechStore.Infrastructure.csproj --startup-project src/ExhaTechStore.Api/ExhaTechStore.Api.csproj
 ```
 
 (O correras esto desde pipeline / máquina con acceso al Postgres.)

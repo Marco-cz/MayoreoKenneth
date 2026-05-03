@@ -1,6 +1,6 @@
-# Yurguen: Publica sólo la tienda estática (src/MayoreoKenneth.Web) a GitHub Pages.
+# Yurguen: Publica sólo la tienda estática (src/ExhaTechStore.Web) a GitHub Pages.
 # Requiere: Settings → Pages → Source = GitHub Actions
-# Variables: MK_API_BASE_URL (pública) = URL base del API en prod, ej https://tu-api.up.railway.app
+# Variables: MK_API_BASE_URL = URL API (sin barra final). Opcional MK_TENANT_SLUG (default mayoreokenneth).
 
 name: Deploy web (GitHub Pages)
 
@@ -8,12 +8,12 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "src/MayoreoKenneth.Web/**"
+      - "src/ExhaTechStore.Web/**"
       - ".github/workflows/deploy-web-github-pages.yml"
   workflow_dispatch:
 
 concurrency:
-  group: gh-pages-mayoreo
+  group: gh-pages-exhatech-store
   cancel-in-progress: true
 
 permissions:
@@ -33,10 +33,11 @@ jobs:
       - name: Yurguen Armar artefacto del sitio
         env:
           MK_API_BASE_URL: ${{ vars.MK_API_BASE_URL }}
+          DEPLOY_SLUG: ${{ vars.MK_TENANT_SLUG }}
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp -r src/MayoreoKenneth.Web/* _site/
+          cp -r src/ExhaTechStore.Web/* _site/
           if [ -z "${MK_API_BASE_URL:-}" ]; then
             echo "::error title=MK_API_BASE_URL vacía::Definila en Repo → Settings → Secrets and variables → Actions → Variables (ej. https://tu-api.up.railway.app sin barra final)"
             exit 1
@@ -44,12 +45,19 @@ jobs:
           python3 - <<'PY'
           import json, os, pathlib
           url = os.environ["MK_API_BASE_URL"].strip().rstrip("/")
-          pathlib.Path("_site/config.runtime.js").write_text(
+          raw = os.environ.get("DEPLOY_SLUG") or ""
+          slug = (raw.strip().lower() or "mayoreokenneth").replace("/", "")
+          text = (
               "window.__MK_API_BASE_URL__ = "
               + json.dumps(url)
-              + ";\n",
-              encoding="utf-8",
+              + ";\nwindow.__MK_TENANT_SLUG__ = "
+              + json.dumps(slug)
+              + ";\n"
           )
+          pathlib.Path("_site/config.runtime.js").write_text(text, encoding="utf-8")
+          # Yurguen: Misma URL en /tienda para el catálogo público.
+          pathlib.Path("_site/tienda").mkdir(parents=True, exist_ok=True)
+          pathlib.Path("_site/tienda/config.runtime.js").write_text(text, encoding="utf-8")
           PY
 
       - uses: actions/configure-pages@v5

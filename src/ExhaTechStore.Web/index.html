@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExhaTech — Administración plataforma</title>
+  <link rel="stylesheet" href="./platform.css" />
+</head>
+<body>
+  <div id="vista-login" class="panel panel--narrow">
+    <h1>ExhaTech Store</h1>
+    <p class="sub">Portal de dueños (no es login de tienda cliente).</p>
+    <label>Correo</label>
+    <input id="loginEmail" type="email" autocomplete="username" />
+    <label>Contraseña</label>
+    <input id="loginPass" type="password" autocomplete="current-password" />
+    <button id="loginBtn" type="button" class="btn-primary">Ingresar</button>
+    <p id="loginMsg" class="msg"></p>
+    <p class="foot"><a href="./tienda/">Ir a tienda pública demo</a></p>
+  </div>
+
+  <div id="vista-dash" class="hidden">
+    <header class="topbar">
+      <div>
+        <strong>Administración ExhaTech</strong>
+        <span id="ownerHello" class="hello"></span>
+      </div>
+      <div class="tools">
+        <button id="btnRefresh" type="button" class="btn-ghost">Actualizar</button>
+        <button id="btnLogout" type="button" class="btn-danger">Salir</button>
+      </div>
+    </header>
+
+    <main class="dash">
+      <section class="cards" id="kpiCards"></section>
+
+      <section class="charts">
+        <div class="chart-box">
+          <h3>Ventas y comisión estimada (ejemplo)</h3>
+          <canvas id="chartVentas"></canvas>
+        </div>
+        <div id="pieWrap" class="chart-box hidden">
+          <h3>Participación por tenant (órdenes en BD)</h3>
+          <canvas id="chartTenants"></canvas>
+        </div>
+      </section>
+
+      <section class="tenants-panel">
+        <h3>Clientes (tenants)</h3>
+        <p id="tenantsHint" class="sub"></p>
+        <div id="formAlta" class="alta-form">
+          <input id="tenantSlug" type="text" placeholder="slug (ej: mitienda)" />
+          <input id="tenantNombre" type="text" placeholder="Nombre para mostrar" />
+          <button id="btnAltaTenant" type="button" class="btn-primary">Agregar cliente</button>
+        </div>
+        <p id="altaMsg" class="msg"></p>
+        <div id="tenantsTabla" class="tabla-wrap"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="./config.runtime.js"></script>
+  <script src="./platform.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+/* Yurguen: Estilos mínimos del panel dueños en la raíz del sitio estático */
+
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: #ecf0fa;
+  color: #182030;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #1a2440;
+  color: #fff;
+}
+
+.tools {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.hello {
+  display: block;
+  font-weight: normal;
+  font-size: 0.85rem;
+  opacity: 0.92;
+}
+
+.dash {
+  padding: 1rem 1.25rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.panel {
+  max-width: 380px;
+  margin: 3rem auto;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgb(0 0 0 / 10%);
+}
+
+.panel h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+}
+
+.sub {
+  margin: 0 0 1rem;
+  color: #5a6478;
+  font-size: 0.9rem;
+}
+
+label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 0.6rem 0 0.2rem;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #c9d2e6;
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.95rem;
+}
+
+.btn-primary,
+.btn-ghost,
+.btn-danger {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.75rem;
+}
+
+.btn-primary {
+  width: 100%;
+  background: #3155d9;
+  color: #fff;
+}
+
+.btn-ghost {
+  background: #3a4d7a;
+  color: #fff;
+}
+
+.btn-danger {
+  background: #b33a3a;
+  color: #fff;
+}
+
+.msg {
+  min-height: 1.2rem;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+  color: #c44747;
+}
+
+.foot {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.kpi {
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+}
+
+.kpi strong {
+  display: block;
+  font-size: 1.25rem;
+}
+
+.kpi span {
+  font-size: 0.75rem;
+  color: #5a6478;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+}
+
+.chart-box h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.tenants-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+}
+
+.tenants-panel h3 {
+  margin: 0 0 0.35rem;
+}
+
+.alta-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.alta-form input {
+  flex: 1 1 140px;
+  margin: 0;
+}
+
+.alta-form .btn-primary {
+  width: auto;
+  margin: 0;
+}
+
+.tabla-wrap {
+  overflow-x: auto;
+  margin-top: 0.75rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid #e4e8f0;
+}
+
+th {
+  color: #5a6478;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.badge-off {
+  color: #c44747;
+  font-weight: 700;
+}
