@@ -1,0 +1,6 @@
+{
+  "stores": [
+    { "path": "MayoreoKenneth", "displayName": "MayoreoKenneth", "apiSlug": "mayoreokenneth" },
+    { "path": "NinaDesigns", "displayName": "NinaDesigns", "apiSlug": "ninadesigns" }
+  ]
+}

@@ -10,6 +10,11 @@ public class Tenant
 
     public string DisplayName { get; set; } = string.Empty;
 
+    // Yurguen: Marca tienda (públicos en GET storefront/perfil).
+    public string? LogoUrl { get; set; }
+
+    public string? FooterPhone { get; set; }
+
     public bool IsActive { get; set; } = true;
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;

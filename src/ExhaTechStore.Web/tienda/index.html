@@ -1,123 +1,182 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Catálogo MayoreoKenneth o NinaDesigns — ExhaTech Store." />
-  <title>ExhaTech Store</title>
-  <link rel="preload" href="./styles.css" as="style" />
-  <link rel="stylesheet" href="./styles.css" />
+  <title>Tiendas — ExhaTech Store</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eaeded;
+      color: #0f1111;
+      min-height: 100vh;
+    }
+    .hero {
+      background: linear-gradient(180deg, #131921 0%, #232f3e 100%);
+      color: #fff;
+      padding: 1.4rem 1rem 1.2rem;
+    }
+    .hero-inner {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(1.15rem, 4vw, 1.7rem);
+    }
+    .hero p {
+      margin: 0.45rem 0 0;
+      color: #d5d9d9;
+      font-size: 0.95rem;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    .notice {
+      margin: 0 0 0.9rem;
+      padding: 0.7rem 0.8rem;
+      border-radius: 10px;
+      background: #fff3cd;
+      color: #4d3b00;
+      border: 1px solid #ffe69c;
+      font-size: 0.9rem;
+    }
+    .hidden { display: none !important; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.9rem;
+    }
+    .card {
+      border: 1px solid #d5d9d9;
+      border-radius: 12px;
+      background: #fff;
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      min-height: 140px;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 1rem;
+      color: #0f1111;
+    }
+    .card .slug {
+      margin: 0;
+      color: #565959;
+      font-size: 0.82rem;
+    }
+    .go {
+      margin-top: auto;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #fcd200;
+      border-radius: 999px;
+      padding: 0.5rem 0.95rem;
+      background: #ffd814;
+      color: #0f1111;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .go:hover { background: #f7ca00; }
+    .loading {
+      margin: 0;
+      color: #565959;
+    }
+  </style>
 </head>
 <body>
-  <p class="sub" style="margin:0;padding:0.4rem 1.5rem;background:#e8ecf7;font-size:0.8rem">
-    <a href="../">← Portal dueños</a>
-  </p>
-  <header class="topbar">
-    <h1>ExhaTech Store</h1>
-    <button id="cartToggle" class="cart-button">Carrito (<span id="cartCount">0</span>)</button>
+  <header class="hero">
+    <div class="hero-inner">
+      <h1>Elegí tu tienda</h1>
+      <p>Entrá a cada marca desde acá, con enlaces directos listos para producción.</p>
+    </div>
   </header>
-
-  <main class="layout">
-    <section>
-      <h2>Catalogo</h2>
-      <p class="sub">MVP local sin BD ni pasarela.</p>
-      <div id="productGrid" class="grid"></div>
-    </section>
-
-    <aside id="cartPanel" class="cart-panel hidden">
-      <h3>Mi carrito</h3>
-      <div id="cartItems"></div>
-      <div class="total-row">
-        <span>Total:</span>
-        <strong id="cartTotal">$0.00</strong>
-      </div>
-
-      <h4 class="checkout-section-title">Datos para factura</h4>
-      <p class="checkout-hint">Estos datos se usaran para emitir su comprobante electronico ante Hacienda.</p>
-      <div class="checkout-fields">
-        <label>Tipo identificación</label>
-        <select id="factTipoId">
-          <option value="FISICA">Persona física</option>
-          <option value="JURIDICA">Persona jurídica</option>
-          <option value="DIMEX">DIMEX</option>
-          <option value="NITE">NITE</option>
-        </select>
-        <label>Número identificación</label>
-        <input id="factNumeroId" type="text" placeholder="Ej: 1-1234-5678" />
-        <label>Nombre completo o razón social</label>
-        <input id="factNombre" type="text" placeholder="Como debe salir en la factura" />
-        <label>Correo para factura</label>
-        <input id="factCorreo" type="email" placeholder="correo@ejemplo.com" />
-        <label>Teléfono</label>
-        <input id="factTelefono" type="tel" placeholder="Ej: 88887777" />
-      </div>
-
-      <h4 class="checkout-section-title">Entrega</h4>
-      <p class="checkout-hint">Puede ser distinta a la de facturación.</p>
-      <div class="checkout-fields">
-        <label>Nombre quien recibe</label>
-        <input id="envNombre" type="text" placeholder="Nombre del contacto" />
-        <label>Teléfono entrega</label>
-        <input id="envTelefono" type="tel" placeholder="Ej: 88887777" />
-        <label>Provincia</label>
-        <input id="envProvincia" type="text" placeholder="Ej: San José" />
-        <label>Cantón</label>
-        <input id="envCanton" type="text" placeholder="Ej: Montes de Oca" />
-        <label>Distrito (opcional)</label>
-        <input id="envDistrito" type="text" placeholder="Ej: San Pedro" />
-        <label>Dirección exacta</label>
-        <textarea id="envDireccion" rows="2" placeholder="Señas, edificio, apartamento..."></textarea>
-        <label>Referencias (opcional)</label>
-        <input id="envReferencias" type="text" placeholder="Punto de referencia" />
-      </div>
-
-      <button id="checkoutBtn" class="checkout">Simular checkout</button>
-      <p id="checkoutMessage" class="message"></p>
-    </aside>
+  <main class="wrap">
+    <p id="avisoUna" class="notice hidden"></p>
+    <div id="listaTiendas" class="grid">
+      <p class="loading">Cargando tiendas…</p>
+    </div>
   </main>
+  <script>
+    (function () {
+      var root = document.getElementById("listaTiendas");
+      var aviso = document.getElementById("avisoUna");
+      var fallback = [
+        { path: "MayoreoKenneth", displayName: "MayoreoKenneth", apiSlug: "mayoreokenneth" },
+        { path: "NinaDesigns", displayName: "NinaDesigns", apiSlug: "ninadesigns" }
+      ];
 
-  <section class="orders-section">
-    <h3>Historial de ordenes MVP</h3>
-    <p class="sub">Estas ordenes son temporales y se reinician al reiniciar el API.</p>
-    <div id="ordersHistory"></div>
-  </section>
+      function carpeta(s) {
+        return (s.path || s.slug || "").toString().trim();
+      }
 
-  <section class="orders-section">
-    <h3>Errores, comentarios o consultas</h3>
-    <p class="sub">No requiere cuenta. Use este formulario para reportar fallos de la página, sugerencias o dudas. Si aplica, indique número de orden.</p>
-    <div class="checkout-fields">
-      <label>Correo de contacto</label>
-      <input id="soporteCorreo" type="email" placeholder="correo@ejemplo.com" />
-      <label>Nombre</label>
-      <input id="soporteNombre" type="text" placeholder="Su nombre" />
-      <label>Número de orden (opcional)</label>
-      <input id="soporteOrden" type="text" placeholder="Ej: MK-MVP-1001" />
-      <label>Asunto</label>
-      <input id="soporteAsunto" type="text" placeholder="Ej: Error al pagar / idea de mejora" />
-      <label>Mensaje</label>
-      <textarea id="soporteDescripcion" rows="4" placeholder="Detalle del error, comentario o consulta..."></textarea>
-      <button id="soporteEnviarBtn" type="button" class="small-btn confirm-btn">Enviar</button>
-    </div>
-    <p id="soporteMensaje" class="message"></p>
-  </section>
+      // Yurguen: Forzar rutas estables /tienda/<carpeta>/ para evitar fallos de enlaces relativos.
+      function hrefTienda(folder) {
+        return "/tienda/" + folder + "/";
+      }
 
-  <button type="button" id="asistenteToggle" class="asistente-fab" aria-label="Abrir asistente de datos">Asistente</button>
-  <div id="asistentePanel" class="asistente-panel hidden" aria-live="polite">
-    <div class="asistente-head">
-      <strong>Asistente de compras</strong>
-      <button type="button" id="asistenteCerrar" class="asistente-cerrar" aria-label="Cerrar">×</button>
-    </div>
-    <p class="asistente-disclaimer">Asistente automático: le ayuda a llenar el formulario. No reemplaza a una persona.</p>
-    <div id="asistenteMensajes" class="asistente-mensajes"></div>
-    <div id="asistenteChips" class="asistente-chips hidden"></div>
-    <form id="asistenteForm" class="asistente-form">
-      <input id="asistenteInput" type="text" autocomplete="off" placeholder="Escriba su respuesta..." />
-      <button type="submit" class="small-btn confirm-btn">Enviar</button>
-    </form>
-    <button type="button" id="asistenteReiniciar" class="asistente-reiniciar small-btn">Empezar de nuevo</button>
-  </div>
+      function cardTienda(store) {
+        var folder = carpeta(store);
+        var label = (store.displayName || folder || "").toString().trim() || folder;
+        if (!folder) return null;
 
-  <script src="./config.runtime.js"></script>
-  <script src="./main.js" defer></script>
+        var card = document.createElement("article");
+        card.className = "card";
+
+        var h2 = document.createElement("h2");
+        h2.textContent = label;
+        card.appendChild(h2);
+
+        var slug = document.createElement("p");
+        slug.className = "slug";
+        slug.textContent = "/" + folder + "/";
+        card.appendChild(slug);
+
+        var go = document.createElement("a");
+        go.className = "go";
+        go.href = hrefTienda(folder);
+        go.textContent = "Entrar a tienda";
+        card.appendChild(go);
+        return card;
+      }
+
+      function pintar(lista) {
+        root.innerHTML = "";
+        for (var i = 0; i < lista.length; i++) {
+          var card = cardTienda(lista[i]);
+          if (card) root.appendChild(card);
+        }
+      }
+
+      fetch("./stores.manifest.json")
+        .then(function (r) {
+          if (!r.ok) throw new Error("no manifest");
+          return r.json();
+        })
+        .then(function (data) {
+          var stores = (data && data.stores) || [];
+          if (!stores.length) stores = fallback;
+          if (stores.length === 1) {
+            var unica = carpeta(stores[0]);
+            aviso.classList.remove("hidden");
+            aviso.textContent = "Solo hay una tienda configurada; te llevamos directo.";
+            window.location.replace(hrefTienda(unica));
+            return;
+          }
+          pintar(stores);
+        })
+        .catch(function () {
+          pintar(fallback);
+        });
+    })();
+  </script>
 </body>
 </html>

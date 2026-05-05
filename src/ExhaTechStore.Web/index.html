@@ -9,14 +9,13 @@
 <body>
   <div id="vista-login" class="panel panel--narrow">
     <h1>ExhaTech Store</h1>
-    <p class="sub">Portal de dueños (no es login de tienda cliente).</p>
-    <label>Correo</label>
-    <input id="loginEmail" type="email" autocomplete="username" />
+    <p class="sub">Acceso reservado para operación de la plataforma.</p>
+    <label>Usuario</label>
+    <input id="loginEmail" type="text" autocomplete="username" />
     <label>Contraseña</label>
     <input id="loginPass" type="password" autocomplete="current-password" />
     <button id="loginBtn" type="button" class="btn-primary">Ingresar</button>
     <p id="loginMsg" class="msg"></p>
-    <p class="foot"><a href="./tienda/">Ir a tienda pública demo</a></p>
   </div>
 
   <div id="vista-dash" class="hidden">
@@ -26,35 +25,45 @@
         <span id="ownerHello" class="hello"></span>
       </div>
       <div class="tools">
+        <a href="./admin.html" class="btn-ghost btn-linklike">admin.html</a>
         <button id="btnRefresh" type="button" class="btn-ghost">Actualizar</button>
         <button id="btnLogout" type="button" class="btn-danger">Salir</button>
       </div>
     </header>
 
     <main class="dash">
-      <section class="cards" id="kpiCards"></section>
+      <nav class="dash-tabs" aria-label="Secciones administración">
+        <button id="tabResumen" type="button" class="dash-tab dash-tab--active" data-yurguen-tab="resumen">Resumen</button>
+        <button id="tabClientes" type="button" class="dash-tab" data-yurguen-tab="clientes">Clientes</button>
+      </nav>
 
-      <section class="charts">
-        <div class="chart-box">
-          <h3>Ventas y comisión estimada (ejemplo)</h3>
-          <canvas id="chartVentas"></canvas>
-        </div>
-        <div id="pieWrap" class="chart-box hidden">
-          <h3>Participación por tenant (órdenes en BD)</h3>
-          <canvas id="chartTenants"></canvas>
-        </div>
+      <section id="panelResumen" class="dash-panel">
+        <section class="cards" id="kpiCards"></section>
+
+        <section class="charts">
+          <div class="chart-box">
+            <h3>Ventas y comisión estimada (ejemplo)</h3>
+            <canvas id="chartVentas"></canvas>
+          </div>
+          <div id="pieWrap" class="chart-box hidden">
+            <h3>Participación por tenant (órdenes en BD)</h3>
+            <canvas id="chartTenants"></canvas>
+          </div>
+        </section>
       </section>
 
-      <section class="tenants-panel">
-        <h3>Clientes (tenants)</h3>
-        <p id="tenantsHint" class="sub"></p>
-        <div id="formAlta" class="alta-form">
-          <input id="tenantSlug" type="text" placeholder="slug (ej: mitienda)" />
-          <input id="tenantNombre" type="text" placeholder="Nombre para mostrar" />
-          <button id="btnAltaTenant" type="button" class="btn-primary">Agregar cliente</button>
-        </div>
-        <p id="altaMsg" class="msg"></p>
-        <div id="tenantsTabla" class="tabla-wrap"></div>
+      <section id="panelClientes" class="dash-panel hidden">
+        <section class="tenants-panel">
+          <h3>Clientes (tenants)</h3>
+          <p id="tenantsHint" class="sub"></p>
+          <div id="formAlta" class="alta-form">
+            <input id="tenantSlug" type="text" placeholder="slug (ej: mitienda)" />
+            <input id="tenantNombre" type="text" placeholder="Nombre para mostrar" />
+            <button id="btnAltaTenant" type="button" class="btn-primary">Agregar cliente</button>
+          </div>
+          <p id="altaMsg" class="msg"></p>
+          <div id="tenantsTabla" class="tabla-wrap"></div>
+        </section>
       </section>
     </main>
   </div>

@@ -32,6 +32,8 @@ public class ExhaTechStoreDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Slug).HasMaxLength(80).IsRequired();
             entity.Property(x => x.DisplayName).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.LogoUrl).HasMaxLength(500);
+            entity.Property(x => x.FooterPhone).HasMaxLength(40);
             entity.HasIndex(x => x.Slug).IsUnique();
 
             entity.HasData(

@@ -1,6 +1,6 @@
 # Yurguen: Publica sólo la tienda estática (src/ExhaTechStore.Web) a GitHub Pages.
 # Requiere: Settings → Pages → Source = GitHub Actions
-# Variables: MK_API_BASE_URL = URL API (sin barra final). Opcional MK_TENANT_SLUG (default mayoreokenneth).
+# Variables: MK_API_BASE_URL (sin barra final). MK_STORE_SLUGS opcional = carpetas URL (MayoreoKenneth,NinaDesigns); API slug = minúsculas automático.
 
 name: Deploy web (GitHub Pages)
 
@@ -33,7 +33,7 @@ jobs:
       - name: Yurguen Armar artefacto del sitio
         env:
           MK_API_BASE_URL: ${{ vars.MK_API_BASE_URL }}
-          DEPLOY_SLUG: ${{ vars.MK_TENANT_SLUG }}
+          MK_STORE_SLUGS: ${{ vars.MK_STORE_SLUGS }}
         run: |
           set -euo pipefail
           mkdir -p _site
@@ -42,22 +42,61 @@ jobs:
             echo "::error title=MK_API_BASE_URL vacía::Definila en Repo → Settings → Secrets and variables → Actions → Variables (ej. https://tu-api.up.railway.app sin barra final)"
             exit 1
           fi
+          # Yurguen: Plantilla MayoreoKenneth → una carpeta por marca en URL (/tienda/MayoreoKenneth/…).
+          TPL="src/ExhaTechStore.Web/tienda/MayoreoKenneth"
+          IFS=',' read -ra SLUG_ARR <<< "${MK_STORE_SLUGS:-MayoreoKenneth,NinaDesigns}"
+          for raw in "${SLUG_ARR[@]}"; do
+            slug="$(echo "${raw}" | tr -d '[:space:]')"
+            if [ -z "${slug}" ]; then
+              continue
+            fi
+            mkdir -p "_site/tienda/${slug}"
+            cp -r "${TPL}/." "_site/tienda/${slug}/"
+          done
           python3 - <<'PY'
           import json, os, pathlib
+
           url = os.environ["MK_API_BASE_URL"].strip().rstrip("/")
-          raw = os.environ.get("DEPLOY_SLUG") or ""
-          slug = (raw.strip().lower() or "mayoreokenneth").replace("/", "")
-          text = (
-              "window.__MK_API_BASE_URL__ = "
-              + json.dumps(url)
-              + ";\nwindow.__MK_TENANT_SLUG__ = "
-              + json.dumps(slug)
-              + ";\n"
+          paths_csv = os.environ.get("MK_STORE_SLUGS", "MayoreoKenneth,NinaDesigns").strip()
+          paths = [s.strip() for s in paths_csv.split(",") if s.strip()]
+          if not paths:
+              paths = ["MayoreoKenneth", "NinaDesigns"]
+
+
+          def cfg_tienda(api_slug: str) -> str:
+              return (
+                  "window.__MK_API_BASE_URL__ = "
+                  + json.dumps(url)
+                  + ";\nwindow.__MK_TENANT_API_SLUG__ = "
+                  + json.dumps(api_slug)
+                  + ";\n"
+              )
+
+
+          def cfg_api_only() -> str:
+              return "window.__MK_API_BASE_URL__ = " + json.dumps(url) + ";\n"
+
+          # Yurguen: Raíz = portal dueños (slug API default solo por compat).
+          pathlib.Path("_site/config.runtime.js").write_text(cfg_tienda("mayoreokenneth"), encoding="utf-8")
+          stores_manifest = []
+          for path_folder in paths:
+              api_slug = path_folder.strip().lower()
+              tt = pathlib.Path("_site/tienda") / path_folder
+              tt.mkdir(parents=True, exist_ok=True)
+              (tt / "config.runtime.js").write_text(cfg_tienda(api_slug), encoding="utf-8")
+              stores_manifest.append(
+                  {
+                      "path": path_folder,
+                      "displayName": path_folder,
+                      "apiSlug": api_slug,
+                  }
+              )
+              ap = pathlib.Path("_site/admin") / path_folder
+              ap.mkdir(parents=True, exist_ok=True)
+              (ap / "config.runtime.js").write_text(cfg_api_only(), encoding="utf-8")
+          pathlib.Path("_site/tienda/stores.manifest.json").write_text(
+              json.dumps({"stores": stores_manifest}, ensure_ascii=False, indent=2), encoding="utf-8"
           )
-          pathlib.Path("_site/config.runtime.js").write_text(text, encoding="utf-8")
-          # Yurguen: Misma URL en /tienda para el catálogo público.
-          pathlib.Path("_site/tienda").mkdir(parents=True, exist_ok=True)
-          pathlib.Path("_site/tienda/config.runtime.js").write_text(text, encoding="utf-8")
           PY
 
       - uses: actions/configure-pages@v5

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="NinaDesigns — ExhaTech Store." />
+  <title>NinaDesigns · ExhaTech Store</title>
+  <!-- Yurguen: URL pública solicitada /tienda/NinaDesigns/ — apiSlug sigue siendo minúsculas -->
+  <link rel="preload" href="../styles.css" as="style" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body class="tienda-shell amazon-theme">
+  <!-- Yurguen: Cabecera estilo marketplace (barra oscura + búsqueda prominente) -->
+  <header class="amz-header" role="banner">
+    <div class="amz-bar-primary">
+      <button type="button" class="amz-hamburger mobile-only-cart" id="mobileMenuBtn" aria-label="Abrir menú de secciones">☰</button>
+      <!-- Yurguen: Logo = inicio (Amazon); nombre sólo sr-only desde API/HTML -->
+      <h1 id="tituloTiendaCabecera" class="visually-hidden">NinaDesigns</h1>
+      <button type="button" class="amz-brand-home" data-yurguen-view="catalog" aria-label="Inicio — catálogo">
+        <img id="brandLogo" class="brand-logo brand-logo-amz hidden" width="36" height="36" alt="" decoding="async" />
+        <span id="amzBrandMark" class="amz-brand-mark" aria-hidden="true">N</span>
+      </button>
+      <div class="amz-search-wrap">
+        <label class="visually-hidden" for="catalogSearch">Buscar en esta tienda</label>
+        <input type="search" id="catalogSearch" class="amz-search-input" placeholder="Buscar en esta tienda…" autocomplete="off" />
+        <span class="amz-search-hint" aria-hidden="true">↵</span>
+      </div>
+      <nav class="amz-nav-inline" aria-label="Secciones de la tienda">
+        <button type="button" class="nav-tab" data-yurguen-view="catalog">Inicio</button>
+        <button type="button" class="nav-tab" data-yurguen-view="cart">
+          Carrito <span id="cartCountNav" class="nav-badge">0</span>
+        </button>
+        <button type="button" class="nav-tab nav-tab-primary" data-yurguen-view="checkout">Pagar</button>
+      </nav>
+    </div>
+    <div class="amz-bar-secondary">
+      <p id="catalogMeta" class="amz-results-line"></p>
+    </div>
+  </header>
+
+  <div id="mobileNavOverlay" class="mobile-nav-overlay hidden" aria-hidden="true"></div>
+  <aside id="mobileNavDrawer" class="mobile-nav-drawer hidden" aria-modal="true" role="dialog" aria-label="Menú de la tienda">
+    <div class="mobile-nav-head">
+      <strong>Menú</strong>
+      <button type="button" id="mobileNavClose" class="mobile-nav-close" aria-label="Cerrar menú">&times;</button>
+    </div>
+    <nav class="mobile-nav-list">
+      <button type="button" class="mobile-nav-item" data-yurguen-view="catalog">Inicio</button>
+      <button type="button" class="mobile-nav-item" data-yurguen-view="cart">
+        Carrito <span id="cartCountDrawer" class="nav-badge">0</span>
+      </button>
+      <button type="button" class="mobile-nav-item nav-tab-primary" data-yurguen-view="checkout">Pagar</button>
+      <button type="button" class="mobile-nav-item mobile-nav-mini" id="drawerQuickCart">Carrito rápido (panel)</button>
+    </nav>
+  </aside>
+
+  <!-- Yurguen: Inicio — solo catálogo (no chorrear factura/abajo como Amazon-lite) -->
+  <section id="view-catalog" class="view-panel" data-yurguen-panel="catalog">
+    <div class="page-inner hero-catalog">
+      <div id="productGrid" class="grid grid-modern"></div>
+      <button type="button" id="catalogLoadMore" class="catalog-load-more hidden">Cargar más productos</button>
+    </div>
+  </section>
+
+  <!-- Yurguen: Carrito lista + qty (no es la pasarela aún) -->
+  <section id="view-cart" class="view-panel hidden" data-yurguen-panel="cart">
+    <div class="page-inner">
+      <h2 class="page-title">Su carrito</h2>
+      <div id="cartItems" class="cart-items-list"></div>
+      <div class="cart-summary-band">
+        <span>Total</span>
+        <strong id="cartTotal">₡0</strong>
+      </div>
+      <button type="button" id="gotoCheckoutBtn" class="btn-primary-solid">Ir a datos de facturación y pagar</button>
+    </div>
+  </section>
+
+  <!-- Yurguen: Pagar = después va pasarela; aquí se confirman datos antes del cobro y la coordinación de entrega -->
+  <section id="view-checkout" class="view-panel hidden" data-yurguen-panel="checkout">
+    <div class="page-inner checkout-page">
+      <h2 class="page-title">Pago y entrega</h2>
+      <p class="sub">Pasarela real se conectará después. Aquí cargamos datos de factura y entrega antes del cobro.</p>
+
+      <h3 class="checkout-section-title">Datos para factura</h3>
+      <p class="checkout-hint">Información receptor que mostrará la factura electrónica ante Hacienda.</p>
+      <div class="checkout-fields checkout-fields-modern">
+        <label>Tipo identificación</label>
+        <select id="factTipoId">
+          <option value="FISICA">Persona física</option>
+          <option value="JURIDICA">Persona jurídica</option>
+          <option value="DIMEX">DIMEX</option>
+          <option value="NITE">NITE</option>
+        </select>
+        <label>Número identificación</label>
+        <input id="factNumeroId" type="text" placeholder="Ej: 1-1234-5678" />
+        <label>Nombre completo o razón social</label>
+        <input id="factNombre" type="text" placeholder="Tal como en la factura" />
+        <label>Correo para factura</label>
+        <input id="factCorreo" type="email" placeholder="correo@ejemplo.com" />
+        <label>Teléfono</label>
+        <input id="factTelefono" type="tel" placeholder="Ej: 88887777" />
+      </div>
+
+      <h3 class="checkout-section-title">Entrega</h3>
+      <div class="checkout-fields checkout-fields-modern">
+        <label>Nombre quien recibe</label>
+        <input id="envNombre" type="text" placeholder="Nombre del contacto" />
+        <label>Teléfono entrega</label>
+        <input id="envTelefono" type="tel" placeholder="Ej: 88887777" />
+        <label>Provincia</label>
+        <input id="envProvincia" type="text" placeholder="Ej: San José" />
+        <label>Cantón</label>
+        <input id="envCanton" type="text" placeholder="Ej: Montes de Oca" />
+        <label>Distrito (opcional)</label>
+        <input id="envDistrito" type="text" placeholder="Ej: San Pedro" />
+        <label>Dirección exacta</label>
+        <textarea id="envDireccion" rows="2" placeholder="Señas, edificio, apartamento…"></textarea>
+        <label>Referencias (opcional)</label>
+        <input id="envReferencias" type="text" placeholder="Punto de referencia" />
+      </div>
+
+      <button id="checkoutBtn" class="btn-primary-solid checkout-cta" type="button">
+        Confirmar y pagar <span class="sub-inline">(pasarela siguiente)</span>
+      </button>
+      <p id="checkoutMessage" class="message"></p>
+      <button type="button" class="btn-secondary-ghost back-to-catalog" data-yurguen-view="catalog">← Seguir comprando</button>
+    </div>
+  </section>
+
+  <section id="view-orders" class="view-panel hidden" data-yurguen-panel="orders">
+    <div class="page-inner">
+      <h2 class="page-title">Su historial MVP</h2>
+      <p class="sub">Órdenes temporales hasta que el API esté persistente por tenant.</p>
+      <div id="ordersHistory" class="orders-history-modern"></div>
+    </div>
+  </section>
+
+  <!-- Yurguen: Panel lateral rápido (mobile / atajo); vacío inicial -->
+  <aside id="cartPanel" class="cart-panel-slide hidden">
+    <div class="cart-slide-head">
+      <strong>Carrito rápido</strong>
+      <button type="button" id="cartToggle" aria-label="Cerrar panel carrito">×</button>
+    </div>
+    <div id="cartItemsSlide" class="cart-items-mini"></div>
+    <p class="sub">Mirá lista completa en «Carrito».</p>
+  </aside>
+
+  <footer id="tiendaPie" class="tienda-footer" hidden></footer>
+
+  <dialog id="productDetailDialog" class="product-detail-dialog">
+    <form method="dialog" class="product-detail-toolbar">
+      <button type="submit" value="cancel" aria-label="Cerrar detalle">×</button>
+    </form>
+    <div id="productDetailBody" class="product-detail-body"></div>
+  </dialog>
+
+  <!-- Yurguen: FAB arranca reducido; no decimos solo «tienda». -->
+  <!-- Yurguen: FAB Ayuda — flujo nuevo sólo chips + escalación -->
+  <button type="button" id="asistenteToggle" class="asistente-fab asistente-fab--tiny asistente-fab--idle" aria-label="Ayuda">?</button>
+  <div id="asistentePanel" class="asistente-panel hidden" aria-live="polite">
+    <div class="asistente-head">
+      <!-- Yurguen: Título acorde al flujo sólo botones -->
+      <strong id="asistenteTitulo">Ayuda</strong>
+      <div class="asistente-head-actions">
+        <button type="button" id="asistenteMinimizar" class="asistente-mini" aria-label="Reducir" title="Reducir">-</button>
+      </div>
+    </div>
+    <div class="asistente-cuerpo" id="asistenteCuerpo">
+      <p class="asistente-disclaimer">
+        Usá los botones de abajo. <strong>Escribís recién si tocás «Consulta o reclamo»</strong> y abrís el formulario escalado.
+      </p>
+      <div id="asistenteMensajes" class="asistente-mensajes"></div>
+      <div id="asistenteChips" class="asistente-chips hidden"></div>
+      <!-- Yurguen: Bloque sólo visible al escalar; aquí permite escribir el caso -->
+      <div id="asistenteConsultaBloc" class="asistente-consulta-block hidden">
+        <p class="sub small-gap">Consulta o reclamo (escribí el detalle acá):</p>
+        <div class="consulta-mini-fields">
+          <label>Correo</label>
+          <input id="soporteCorreo" type="email" placeholder="Correo" />
+          <label>Nombre</label>
+          <input id="soporteNombre" type="text" placeholder="Nombre" />
+          <label>Orden (opcional)</label>
+          <input id="soporteOrden" type="text" placeholder="Ej: MK-MVP-1001" />
+          <label>Asunto</label>
+          <input id="soporteAsunto" type="text" placeholder="Tema corto" />
+          <label>Mensaje</label>
+          <textarea id="soporteDescripcion" rows="3" placeholder="Describí el problema o la idea"></textarea>
+        </div>
+        <button id="soporteEnviarBtn" type="button" class="small-btn confirm-btn">Enviar consulta</button>
+        <p id="soporteMensaje" class="message"></p>
+      </div>
+      <button type="button" id="asistenteReiniciar" class="asistente-reiniciar small-btn">Menú inicial</button>
+    </div>
+  </div>
+
+  <script src="./config.runtime.js"></script>
+  <script src="../main.js" defer></script>
+</body>
+</html>
+

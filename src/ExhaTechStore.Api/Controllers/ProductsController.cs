@@ -22,6 +22,7 @@ public class ProductsController : ControllerBase
                 x.Id,
                 x.Sku,
                 x.Name,
+                x.ImageUrl,
                 x.Price,
                 x.IsPublished,
                 true,
@@ -49,32 +50,144 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByHeader = "Accept-Encoding")]
-    public async Task<IActionResult> GetAsync(CancellationToken cancellationToken)
+    [ResponseCache(
+        Duration = 20,
+        Location = ResponseCacheLocation.Any,
+        VaryByHeader = "Accept-Encoding",
+        VaryByQueryKeys = new[] { "page", "pageSize", "q" })]
+    public async Task<IActionResult> GetAsync(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 24,
+        [FromQuery] string? q = null,
+        CancellationToken cancellationToken = default)
     {
+        page = page < 1 ? 1 : page;
+        // Yurguen: Paginación grande por defecto para catálogos de muchos ítems.
+        pageSize = pageSize is < 1 or > 96 ? 48 : pageSize;
+        var queryText = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
+
         if (_configuration.GetValue("Catalog:UseInMemory", true))
         {
-            return Ok(InMemoryListCache.Value);
+            var all = InMemoryListCache.Value.AsEnumerable();
+            if (queryText is not null)
+            {
+                var qt = queryText.ToLowerInvariant();
+                all = all.Where(x =>
+                    x.Name.ToLowerInvariant().Contains(qt) ||
+                    x.Sku.ToLowerInvariant().Contains(qt));
+            }
+
+            var filtered = all.OrderBy(x => x.Name).ToList();
+            var total = filtered.Count;
+            var slice = filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var hasMore = page * pageSize < total;
+            return Ok(new ProductCatalogPageResponse(slice, total, page, pageSize, hasMore));
         }
 
-        var products = await _dbContext.Products
+        var baseQuery = _dbContext.Products
             .AsNoTracking()
-            .Where(x => x.TenantId == _tenant.TenantId && x.IsPublished && !x.IsCatalogHidden)
-            .OrderBy(x => x.Name)
-            .ToListAsync(cancellationToken);
+            .Where(x => x.TenantId == _tenant.TenantId && x.IsPublished && !x.IsCatalogHidden);
 
-        var response = products
+        if (queryText is not null)
+        {
+            var term = queryText.ToLowerInvariant();
+            baseQuery = baseQuery.Where(x =>
+                x.Name.ToLower().Contains(term) || x.Sku.ToLower().Contains(term));
+        }
+
+        var totalDb = await baseQuery.CountAsync(cancellationToken);
+
+        var rows = await baseQuery
+            .OrderBy(x => x.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(x => new ProductListItemResponse(
                 x.Id,
                 x.Sku,
                 x.Name,
+                x.ImageUrl,
                 x.DisplayPriceWithIva,
                 x.IsPublished,
                 x.IvaIncludedInDisplayPrice,
                 x.UpdatedAtUtc ?? x.CreatedAtUtc))
-            .ToList();
+            .ToListAsync(cancellationToken);
 
-        return Ok(response);
+        var hasMoreDb = page * pageSize < totalDb;
+        return Ok(new ProductCatalogPageResponse(rows, totalDb, page, pageSize, hasMoreDb));
+    }
+
+    // Yurguen: Base para "Más vendidos" (últimos N días) a partir de órdenes confirmadas/entregadas.
+    [HttpGet("top-selling")]
+    public async Task<IActionResult> GetTopSellingAsync(
+        [FromQuery] int limit = 12,
+        [FromQuery] int days = 30,
+        CancellationToken cancellationToken = default)
+    {
+        limit = limit is < 1 or > 48 ? 12 : limit;
+        days = days is < 1 or > 365 ? 30 : days;
+
+        if (_configuration.GetValue("Catalog:UseInMemory", true))
+        {
+            // Yurguen: En demo memoria aún no hay ventas persistidas; aproximamos con mayor stock simulado.
+            var topMem = _catalogStore.GetProducts()
+                .OrderByDescending(x => x.SimulatedStock)
+                .ThenBy(x => x.Name)
+                .Take(limit)
+                .Select(x => new ProductListItemResponse(
+                    x.Id,
+                    x.Sku,
+                    x.Name,
+                    x.ImageUrl,
+                    x.Price,
+                    x.IsPublished,
+                    true,
+                    DateTime.UtcNow))
+                .ToList();
+            return Ok(topMem);
+        }
+
+        var sinceUtc = DateTime.UtcNow.AddDays(-days);
+        var closedStatuses = new[] { OrderStatus.Confirmed, OrderStatus.Delivered };
+
+        var topDb = await _dbContext.OrderItems
+            .AsNoTracking()
+            .Where(oi =>
+                oi.Order.TenantId == _tenant.TenantId &&
+                oi.Product.TenantId == _tenant.TenantId &&
+                oi.Product.IsPublished &&
+                !oi.Product.IsCatalogHidden &&
+                oi.Order.CreatedAtUtc >= sinceUtc &&
+                closedStatuses.Contains(oi.Order.Status))
+            .GroupBy(oi => new
+            {
+                oi.Product.Id,
+                oi.Product.Sku,
+                oi.Product.Name,
+                oi.Product.ImageUrl,
+                oi.Product.DisplayPriceWithIva,
+                oi.Product.IvaIncludedInDisplayPrice,
+                LastUpdated = oi.Product.UpdatedAtUtc ?? oi.Product.CreatedAtUtc
+            })
+            .Select(g => new
+            {
+                Product = new ProductListItemResponse(
+                    g.Key.Id,
+                    g.Key.Sku,
+                    g.Key.Name,
+                    g.Key.ImageUrl,
+                    g.Key.DisplayPriceWithIva,
+                    true,
+                    g.Key.IvaIncludedInDisplayPrice,
+                    g.Key.LastUpdated),
+                Qty = g.Sum(x => x.Quantity)
+            })
+            .OrderByDescending(x => x.Qty)
+            .ThenBy(x => x.Product.Name)
+            .Take(limit)
+            .Select(x => x.Product)
+            .ToListAsync(cancellationToken);
+
+        return Ok(topDb);
     }
 
     [HttpGet("{id:guid}")]
@@ -191,6 +304,7 @@ public class ProductsController : ControllerBase
             item.Sku,
             item.Name,
             item.Description,
+            item.ImageUrl,
             item.Price,
             item.IsPublished,
             true,
@@ -212,6 +326,8 @@ public class ProductsController : ControllerBase
             entity.Sku,
             entity.Name,
             entity.Description ?? string.Empty,
+            // Yurguen: alinear con ProductDetailResponse (detalle público incluye foto).
+            entity.ImageUrl,
             entity.DisplayPriceWithIva,
             entity.IsPublished,
             entity.IvaIncludedInDisplayPrice,
@@ -249,10 +365,18 @@ public class ProductsController : ControllerBase
     }
 }
 
+public sealed record ProductCatalogPageResponse(
+    IReadOnlyList<ProductListItemResponse> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    bool HasMore);
+
 public sealed record ProductListItemResponse(
     Guid Id,
     string Sku,
     string Name,
+    string? ImageUrl,
     decimal Price,
     bool IsPublished,
     bool IvaIncluidoEnPrecio,
@@ -263,6 +387,7 @@ public sealed record ProductDetailResponse(
     string Sku,
     string Name,
     string Description,
+    string? ImageUrl,
     decimal Price,
     bool IsPublished,
     bool IvaIncluidoEnPrecio,

@@ -5,7 +5,8 @@ public sealed class InMemoryAuthStore
 {
     private static readonly IReadOnlyList<AuthUser> Users =
     [
-        new AuthUser(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "admin@exhatech.store", "Admin123*", "Administrador demo", "Admin"),
+        // Yurguen: Credenciales demo solicitadas para admin tienda.
+        new AuthUser(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "chokoleto", "holamundo", "Administrador demo", "Admin"),
         new AuthUser(Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"), "soporte@exhatech.store", "Soporte123*", "Equipo Soporte demo", "Soporte")
     ];
 

@@ -59,6 +59,55 @@ public class ProductosController : ControllerBase
         await _db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "Descuento actualizado.", porcientoDescuento = pct, precioConIva = product.DisplayPriceWithIva });
     }
+
+    // Yurguen: Nombre, descripción y código (SKU) visibles en la tienda; SKU único por tenant.
+    [HttpPatch("{id:guid}/texto-catalogo")]
+    public async Task<IActionResult> ActualizarTextoCatalogoAsync(
+        Guid id,
+        [FromBody] ActualizarProductoCatalogoTextoDto body,
+        CancellationToken cancellationToken)
+    {
+        var product = await _db.Products.FirstOrDefaultAsync(
+            x => x.Id == id && x.TenantId == _tenant.TenantId,
+            cancellationToken);
+
+        if (product is null)
+        {
+            return NotFound(new { message = "Producto no encontrado." });
+        }
+
+        var sku = body.Sku?.Trim();
+        var nombre = body.Nombre?.Trim();
+        if (string.IsNullOrEmpty(sku) || string.IsNullOrEmpty(nombre))
+        {
+            return BadRequest(new { message = "Sku y nombre son obligatorios." });
+        }
+
+        var duplicado = await _db.Products.AsNoTracking()
+            .AnyAsync(x => x.TenantId == _tenant.TenantId && x.Id != id && x.Sku == sku,
+                cancellationToken);
+        if (duplicado)
+        {
+            return BadRequest(new { message = "Ya existe otro producto con ese SKU en esta tienda." });
+        }
+
+        product.Sku = sku;
+        product.Name = nombre;
+        product.Description = string.IsNullOrWhiteSpace(body.Descripcion)
+            ? null
+            : body.Descripcion.Trim();
+        product.UpdatedAtUtc = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "Texto de catálogo actualizado.", sku, nombre, descripcion = product.Description });
+    }
 }
 
 public sealed record ActualizarDescuentoRequest(decimal PorcientoDescuento);
+
+public sealed class ActualizarProductoCatalogoTextoDto
+{
+    public string? Sku { get; set; }
+    public string? Nombre { get; set; }
+    public string? Descripcion { get; set; }
+}

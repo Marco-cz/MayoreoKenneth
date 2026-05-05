@@ -1,0 +1,77 @@
+/* Yurguen: Admin tienda mínimo (config JWT por slug). */
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1a2233;
+}
+
+body {
+  margin: 0 auto;
+  max-width: 520px;
+  padding: 1.5rem 1rem 2rem;
+  background: #f4f6fb;
+}
+
+label {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #d5dbea;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: #3155d9;
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #d5dbea;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.msg {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #5a6478;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+pre {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid #e4e8f0;
+  font-size: 0.8rem;
+}
+
+.sub {
+  color: #5a6478;
+  font-size: 0.9rem;
+}

@@ -5,7 +5,7 @@ const apiBaseUrl = (() => {
   if (s.length > 0) {
     return s.replace(/\/+$/, "");
   }
-  return "https://localhost:7253";
+  return "http://localhost:5016";
 })();
 
 const TOKEN_KEY = "yurguen_exha_platform_token";
@@ -24,11 +24,25 @@ const altaMsg = document.getElementById("altaMsg");
 const tenantsTabla = document.getElementById("tenantsTabla");
 const tenantsHint = document.getElementById("tenantsHint");
 const formAlta = document.getElementById("formAlta");
+const tabResumen = document.getElementById("tabResumen");
+const tabClientes = document.getElementById("tabClientes");
+const panelResumen = document.getElementById("panelResumen");
+const panelClientes = document.getElementById("panelClientes");
 
 loginBtn.addEventListener("click", iniciarSesion);
 btnLogout.addEventListener("click", cerrarSesion);
 btnRefresh.addEventListener("click", () => cargarTodo());
 btnAltaTenant.addEventListener("click", altaTenant);
+tabResumen?.addEventListener("click", () => mostrarTab("resumen"));
+tabClientes?.addEventListener("click", () => mostrarTab("clientes"));
+
+function mostrarTab(nombre) {
+  const isResumen = nombre !== "clientes";
+  panelResumen?.classList.toggle("hidden", !isResumen);
+  panelClientes?.classList.toggle("hidden", isResumen);
+  tabResumen?.classList.toggle("dash-tab--active", isResumen);
+  tabClientes?.classList.toggle("dash-tab--active", !isResumen);
+}
 
 function tokenActual() {
   return sessionStorage.getItem(TOKEN_KEY) || "";
@@ -176,10 +190,11 @@ async function cargarTenants() {
       ? "Modo desarrollo sin Postgres: alta y activar/desactivar no aplican hasta UseInMemory=false."
       : "Clientes registrados en base de datos.";
 
-  if (data.modo === "inMemory") {
-    formAlta.classList.add("hidden");
-  } else {
-    formAlta.classList.remove("hidden");
+  const inMemory = data.modo === "inMemory";
+  formAlta?.classList.remove("hidden");
+  btnAltaTenant.disabled = false;
+  if (inMemory && !altaMsg.textContent) {
+    altaMsg.textContent = "Modo demo activo: podés probar el botón, pero la API no guarda clientes hasta UseInMemory=false.";
   }
 
   const rows = data.tenants || [];

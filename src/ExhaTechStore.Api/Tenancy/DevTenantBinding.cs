@@ -9,4 +9,7 @@ public sealed class DevTenantBinding
 
     /// <summary>Yurguen: Nombre bonito para el panel dueños cuando no hay Postgres.</summary>
     public string? DisplayName { get; set; }
+
+    /// <summary>Yurguen: Teléfono visible en pie tienda cuando UseInMemory=true.</summary>
+    public string? FooterPhone { get; set; }
 }

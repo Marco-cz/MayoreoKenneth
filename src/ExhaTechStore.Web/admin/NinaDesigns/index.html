@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — NinaDesigns</title>
+  <link rel="stylesheet" href="../admin.css" />
+</head>
+<body class="admin-tenant-body" data-yurguen-api-slug="ninadesigns" data-yurguen-display-name="NinaDesigns">
+  <div id="loginView">
+    <h1>Administración</h1>
+    <p id="adminStoreLabel" class="sub">NinaDesigns</p>
+    <label for="emailIn">Usuario</label>
+    <input id="emailIn" type="text" autocomplete="username" />
+    <label for="passIn">Contraseña</label>
+    <input id="passIn" type="password" autocomplete="current-password" />
+    <button id="btnLogin" type="button" class="btn-primary">Ingresar</button>
+    <p id="loginMsg" class="msg"></p>
+  </div>
+
+  <div id="dashView" class="hidden">
+    <header>
+      <div>
+        <strong>Config</strong>
+        <div id="slugBadge" class="sub"></div>
+      </div>
+      <button id="btnOut" type="button" class="btn-ghost">Salir</button>
+    </header>
+    <pre id="cfgOut"></pre>
+    <p id="dashMsg" class="msg"></p>
+  </div>
+
+  <script src="./config.runtime.js"></script>
+  <script src="../tenant-admin.js" defer></script>
+</body>
+</html>
